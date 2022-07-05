@@ -9,6 +9,7 @@ import {
   updateDoc,
   where,
   getDocs,
+  increment,
 } from "firebase/firestore";
 import midtransClient from "midtrans-client";
 import cors from "cors";
@@ -294,22 +295,35 @@ app.post("/notification_handler", function (req, res) {
       );
       const docSnap = await getDocs(q);
       const id = docSnap.docs[0].id;
+      const uid = docSnap.docs[0].data().customerId;
 
       if (transactionStatus == "capture") {
         if (fraudStatus == "challenge") {
           await updateDoc(doc(firestoreDb, "orders", id), {
             status: "challenge",
           });
+
+          await updateDoc(doc(firestoreDb, "users", uid), {
+            balance: increment(transactionStatusObject.gross_amount),
+          });
           // TODO: set transaction status on your databaase to 'challenge'
         } else if (fraudStatus == "accept") {
           await updateDoc(doc(firestoreDb, "orders", id), {
             status: "accept",
+          });
+
+          await updateDoc(doc(firestoreDb, "users", uid), {
+            balance: increment(transactionStatusObject.gross_amount),
           });
           // TODO: set transaction status on your databaase to 'success'
         }
       } else if (transactionStatus == "settlement") {
         await updateDoc(doc(firestoreDb, "orders", id), {
           status: "settlement",
+        });
+
+        await updateDoc(doc(firestoreDb, "users", uid), {
+          balance: increment(transactionStatusObject.gross_amount),
         });
         // TODO: set transaction status on your databaase to 'success'
         // Note: Non-card transaction will become 'settlement' on payment success
@@ -328,6 +342,7 @@ app.post("/notification_handler", function (req, res) {
         await updateDoc(doc(firestoreDb, "orders", id), {
           status: "pending",
         });
+
         // TODO: set transaction status on your databaase to 'pending' / waiting payment
       } else if (transactionStatus == "refund") {
         await updateDoc(doc(firestoreDb, "orders", id), {
