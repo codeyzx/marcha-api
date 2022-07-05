@@ -288,6 +288,7 @@ app.post("/notification_handler", function (req, res) {
 
       let orderId = transactionStatusObject.order_id;
       let transactionStatus = transactionStatusObject.transaction_status;
+      let gross_amount = transactionStatusObject.gross_amount;
 
       const q = query(
         collection(firestoreDb, "orders"),
@@ -304,7 +305,7 @@ app.post("/notification_handler", function (req, res) {
           });
 
           await updateDoc(doc(firestoreDb, "users", uid), {
-            balance: increment(transactionStatusObject.gross_amount),
+            balance: increment(parseInt(transactionStatusObject.gross_amount)),
           });
           // TODO: set transaction status on your databaase to 'challenge'
         } else if (fraudStatus == "accept") {
@@ -313,7 +314,7 @@ app.post("/notification_handler", function (req, res) {
           });
 
           await updateDoc(doc(firestoreDb, "users", uid), {
-            balance: increment(transactionStatusObject.gross_amount),
+            balance: increment(parseInt(transactionStatusObject.gross_amount)),
           });
           // TODO: set transaction status on your databaase to 'success'
         }
@@ -323,7 +324,7 @@ app.post("/notification_handler", function (req, res) {
         });
 
         await updateDoc(doc(firestoreDb, "users", uid), {
-          balance: increment(transactionStatusObject.gross_amount),
+          balance: increment(parseInt(transactionStatusObject.gross_amount)),
         });
         // TODO: set transaction status on your databaase to 'success'
         // Note: Non-card transaction will become 'settlement' on payment success
