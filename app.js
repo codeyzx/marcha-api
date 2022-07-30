@@ -238,6 +238,7 @@ app.get("/det/:transaction_id", function (req, res) {
     .notification(transaction_id)
     .then((transactionStatusObject) => {
       // let orderId = transactionStatusObject.order_id;
+    //update
       // let transactionStatus = transactionStatusObject.transaction_status;
       // let fraudStatus = transactionStatusObject.fraud_status;
 
