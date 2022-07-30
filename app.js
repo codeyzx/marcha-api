@@ -303,6 +303,7 @@ app.post("/notification_handler", function (req, res) {
         if (fraudStatus == "challenge") {
           await updateDoc(doc(firestoreDb, "orders", id), {
             status: "challenge",
+            token: transactionStatusObject.payment_code,
           });
 
           await updateDoc(doc(firestoreDb, "users", uid), {
@@ -312,6 +313,7 @@ app.post("/notification_handler", function (req, res) {
         } else if (fraudStatus == "accept") {
           await updateDoc(doc(firestoreDb, "orders", id), {
             status: "accept",
+            token: transactionStatusObject.payment_code,
           });
 
           await updateDoc(doc(firestoreDb, "users", uid), {
@@ -322,6 +324,7 @@ app.post("/notification_handler", function (req, res) {
       } else if (transactionStatus == "settlement") {
         await updateDoc(doc(firestoreDb, "orders", id), {
           status: "settlement",
+          token: transactionStatusObject.payment_code,
         });
 
         await updateDoc(doc(firestoreDb, "users", uid), {
@@ -339,16 +342,19 @@ app.post("/notification_handler", function (req, res) {
         // TODO: set transaction status on your databaase to 'failure'
         await updateDoc(doc(firestoreDb, "orders", id), {
           status: "failure",
+          token: transactionStatusObject.payment_code,
         });
       } else if (transactionStatus == "pending") {
         await updateDoc(doc(firestoreDb, "orders", id), {
           status: "pending",
+          token: transactionStatusObject.payment_code,
         });
 
         // TODO: set transaction status on your databaase to 'pending' / waiting payment
       } else if (transactionStatus == "refund") {
         await updateDoc(doc(firestoreDb, "orders", id), {
           status: "refund",
+          token: transactionStatusObject.payment_code,
         });
         // TODO: set transaction status on your databaase to 'refund'
       }
