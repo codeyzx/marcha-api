@@ -16,7 +16,7 @@ import cors from "cors";
 import morgan from "morgan";
 import swaggerUI from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
-import assetLinks from './assetslink.json';
+import assetLinks from './assetslink.json' assert {type: 'json'};
 
 dotenv.config();
 
