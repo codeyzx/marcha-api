@@ -46,6 +46,7 @@ const projectId = process.env.projectId;
 const storageBucket = process.env.storageBucket;
 const messagingSenderId = process.env.messagingSenderId;
 const appId = process.env.appId;
+const assetLinks = require('assetslink.json')
 
 const PORT = process.env.PORT || 3000;
 
@@ -238,7 +239,7 @@ app.get("/det/:transaction_id", function (req, res) {
     .notification(transaction_id)
     .then((transactionStatusObject) => {
       // let orderId = transactionStatusObject.order_id;
-    //update
+      //update
       // let transactionStatus = transactionStatusObject.transaction_status;
       // let fraudStatus = transactionStatusObject.fraud_status;
 
@@ -278,6 +279,10 @@ app.get("/det/:transaction_id", function (req, res) {
       });
     });
 });
+
+app.get("/.well-known/assetlinks.json", function (req, res) {
+  res.json(assetLinks);
+})
 
 app.post("/notification_handler", function (req, res) {
   let receivedJson = req.body;
