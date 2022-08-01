@@ -46,7 +46,7 @@ const projectId = process.env.projectId;
 const storageBucket = process.env.storageBucket;
 const messagingSenderId = process.env.messagingSenderId;
 const appId = process.env.appId;
-const assetLinks = require('assetslink.json')
+const assetLinks = require('./assetslink.json')
 
 const PORT = process.env.PORT || 3000;
 

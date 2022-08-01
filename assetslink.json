@@ -5,9 +5,9 @@
         ],
         "target": {
             "namespace": "android_app",
-            "package_name": "fr.smarquis.applinks",
+            "package_name": "com.example.marcha_branch",
             "sha256_cert_fingerprints": [
-                "6B:41:26:A6:1E:D8:BD:91:D3:8B:57:10:5F:07:5C:2D:AB:3E:26:A4:D1:3C:9C:97:15:78:9E:0D:56:0A:CE:DC"
+                "A5:14:9D:22:CF:18:29:9C:30:FC:AF:C5:4A:62:F2:F1:B2:85:BD:23:24:C0:66:0C:0E:2C:28:27:ED:A4:A8:FE"
             ]
         }
     }
