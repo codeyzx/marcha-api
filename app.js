@@ -16,6 +16,7 @@ import cors from "cors";
 import morgan from "morgan";
 import swaggerUI from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
+import assetLinks from './assetslink.json';
 
 dotenv.config();
 
@@ -46,7 +47,6 @@ const projectId = process.env.projectId;
 const storageBucket = process.env.storageBucket;
 const messagingSenderId = process.env.messagingSenderId;
 const appId = process.env.appId;
-const assetLinks = require('./assetslink.json')
 
 const PORT = process.env.PORT || 3000;
 
