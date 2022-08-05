@@ -238,38 +238,7 @@ app.get("/det/:transaction_id", function (req, res) {
   snap.transaction
     .notification(transaction_id)
     .then((transactionStatusObject) => {
-      // let orderId = transactionStatusObject.order_id;
-      //update
-      // let transactionStatus = transactionStatusObject.transaction_status;
-      // let fraudStatus = transactionStatusObject.fraud_status;
-
       let summary = transactionStatusObject;
-
-      // [5.B] Handle transaction status on your backend via notification alternatively
-      // Sample transactionStatus handling logic
-      // if (transactionStatus == "capture") {
-      //   if (fraudStatus == "challenge") {
-      //     // TODO: set transaction status on your databaase to 'challenge'
-      //   } else if (fraudStatus == "accept") {
-      //     // TODO: set transaction status on your databaase to 'success'
-      //   }
-      // } else if (transactionStatus == "settlement") {
-      //   // TODO: set transaction status on your databaase to 'success'
-      //   // Note: Non-card transaction will become 'settlement' on payment success
-      //   // Card transaction will also become 'settlement' D+1, which you can ignore
-      //   // because most of the time 'capture' is enough to be considered as success
-      // } else if (
-      //   transactionStatus == "cancel" ||
-      //   transactionStatus == "deny" ||
-      //   transactionStatus == "expire"
-      // ) {
-      //   // TODO: set transaction status on your databaase to 'failure'
-      // } else if (transactionStatus == "pending") {
-      //   // TODO: set transaction status on your databaase to 'pending' / waiting payment
-      // } else if (transactionStatus == "refund") {
-      //   // TODO: set transaction status on your databaase to 'refund'
-      // }
-
       res.status(200).send(summary);
     })
     .catch(() => {
@@ -295,74 +264,64 @@ app.post("/notification_handler", function (req, res) {
       let orderId = transactionStatusObject.order_id;
       let transactionStatus = transactionStatusObject.transaction_status;
       let gross_amount = transactionStatusObject.gross_amount;
+      let payment_type = transactionStatusObject.payment_type;
 
-      const q = query(
-        collection(firestoreDb, "orders"),
-        where("orderId", "==", orderId)
-      );
+      const q = query(collection(firestoreDb, "orders"), where("orderId", "==", orderId));
       const docSnap = await getDocs(q);
       const id = docSnap.docs[0].id;
       const uid = docSnap.docs[0].data().customerId;
 
-      if (transactionStatus == "capture") {
-        if (fraudStatus == "challenge") {
-          await updateDoc(doc(firestoreDb, "orders", id), {
-            status: "challenge",
-            token: transactionStatusObject.payment_code,
-          });
+      if (payment_type == 'cstore') {
+        await updateDoc(doc(firestoreDb, "orders", id), {
+          methodPayment: transactionStatusObject.store,
+          status: transactionStatus,
+          token: transactionStatusObject.payment_code,
+        });
 
+        if (transactionStatus == 'settlement' || transactionStatus == 'capture') {
           await updateDoc(doc(firestoreDb, "users", uid), {
-            balance: increment(parseInt(transactionStatusObject.gross_amount)),
+            balance: increment(parseInt(gross_amount)),
           });
-          // TODO: set transaction status on your databaase to 'challenge'
-        } else if (fraudStatus == "accept") {
-          await updateDoc(doc(firestoreDb, "orders", id), {
-            status: "accept",
-            token: transactionStatusObject.payment_code,
-          });
-
-          await updateDoc(doc(firestoreDb, "users", uid), {
-            balance: increment(parseInt(transactionStatusObject.gross_amount)),
-          });
-          // TODO: set transaction status on your databaase to 'success'
         }
-      } else if (transactionStatus == "settlement") {
+      } else if (payment_type == 'gopay' || payment_type == 'qris' || payment_type == 'shopeepay') {
         await updateDoc(doc(firestoreDb, "orders", id), {
-          status: "settlement",
-          token: transactionStatusObject.payment_code,
+          methodPayment: payment_type,
+          status: transactionStatus,
         });
 
-        await updateDoc(doc(firestoreDb, "users", uid), {
-          balance: increment(parseInt(transactionStatusObject.gross_amount)),
-        });
-        // TODO: set transaction status on your databaase to 'success'
-        // Note: Non-card transaction will become 'settlement' on payment success
-        // Card transaction will also become 'settlement' D+1, which you can ignore
-        // because most of the time 'capture' is enough to be considered as success
-      } else if (
-        transactionStatus == "cancel" ||
-        transactionStatus == "deny" ||
-        transactionStatus == "expire"
-      ) {
-        // TODO: set transaction status on your databaase to 'failure'
-        await updateDoc(doc(firestoreDb, "orders", id), {
-          status: "failure",
-          token: transactionStatusObject.payment_code,
-        });
-      } else if (transactionStatus == "pending") {
-        await updateDoc(doc(firestoreDb, "orders", id), {
-          status: "pending",
-          token: transactionStatusObject.payment_code,
-        });
+        if (transactionStatus == 'settlement' || transactionStatus == 'capture') {
+          await updateDoc(doc(firestoreDb, "users", uid), {
+            balance: increment(parseInt(gross_amount)),
+          });
+        }
+      } else if (payment_type == 'bank_transfer') {
+        if (transactionStatusObject.permata_va_number != null) {
+          await updateDoc(doc(firestoreDb, "orders", id), {
+            methodPayment: 'permata',
+            status: transactionStatus,
+            token: transactionStatusObject.permata_va_number,
+          });
 
-        // TODO: set transaction status on your databaase to 'pending' / waiting payment
-      } else if (transactionStatus == "refund") {
-        await updateDoc(doc(firestoreDb, "orders", id), {
-          status: "refund",
-          token: transactionStatusObject.payment_code,
-        });
-        // TODO: set transaction status on your databaase to 'refund'
+          if (transactionStatus == 'settlement' || transactionStatus == 'capture') {
+            await updateDoc(doc(firestoreDb, "users", uid), {
+              balance: increment(parseInt(gross_amount)),
+            });
+          }
+        } else {
+          await updateDoc(doc(firestoreDb, "orders", id), {
+            methodPayment: transactionStatusObject.va_numbers[0].bank,
+            status: transactionStatus,
+            token: transactionStatusObject.va_numbers[0].va_number,
+          });
+
+          if (transactionStatus == 'settlement' || transactionStatus == 'capture') {
+            await updateDoc(doc(firestoreDb, "users", uid), {
+              balance: increment(parseInt(gross_amount)),
+            });
+          }
+        }
       }
+
 
       res.status(200).send(transactionStatusObject);
     })
