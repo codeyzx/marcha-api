@@ -60,7 +60,7 @@ const firebaseConfig = {
 };
 
 const snap = new midtransClient.Snap({
-  isProduction: false,
+//   isProduction: false,
   serverKey: process.env.SERVER_KEY,
   clientKey: process.env.CLIENT_KEY,
 });
