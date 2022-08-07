@@ -62,7 +62,7 @@ const firebaseConfig = {
 const snap = new midtransClient.Snap({
 //   isProduction: false,
   serverKey: process.env.SERVER_KEY,
-  clientKey: process.env.CLIENT_KEY,
+//   clientKey: process.env.CLIENT_KEY,
 });
 
 app.use(express.urlencoded({ extended: true })); // to support URL-encoded POST body
