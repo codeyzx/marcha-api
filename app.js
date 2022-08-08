@@ -187,30 +187,58 @@ app.post("/charge", function (req, res) {
     gross_amount += item.price * item.quantity;
   });
   let orderIdRand = body.order_id;
-  let parameter = {
-    transaction_details: {
-      order_id: "order-id-" + orderIdRand,
-      gross_amount: gross_amount,
+  let parameters = {
+    "transaction_details": {
+      "order_id": "order-id-" + orderIdRand,
+      "gross_amount": gross_amount,
     },
-    customer_details: customers,
-    item_details: items,
-    callbacks: {
-      finish: url,
+    "customer_details": {
+      "email": "yahyatruth@gmail.com",
+      "first_name": "yahya",
+      "last_name": "",
+      "phone": "085624491"
     },
+    "item_details": items
   };
+  let parameterz = {
+    "transaction_details": {
+      "order_id": "YOUR-ORDERID-123456",
+      "gross_amount": 10000
+    },
+    "credit_card": {
+      "secure": true
+    },
+    "customer_details": {
+      "first_name": "budi",
+      "last_name": "pratama",
+      "email": "budi.pra@example.com",
+      "phone": "08111222333"
+    }
+  };
+  snap.createTransaction(parameters)
+    .then((transaction) => {
+      // transaction token
+      let transactionToken = transaction.token;
+      console.log('transaction:', transaction);
+      console.log('transactionToken:', transactionToken);
+    })
+
+  // let parameter = JSON.stringify(parameters);
+
+  // console.log(parameter);
 
   // create snap transaction token
-  snap
-    .createTransactionToken(parameter)
-    .then((transactionToken) => {
-      res.status(200).json({ token: transactionToken });
-    })
-    .catch((e) => {
-      res.status(404).json({
-        status_code: "404",
-        error_message: e,
-      });
-    });
+  // snap
+  //   .createTransactionToken(parameterz)
+  //   .then((transactionToken) => {
+  //     res.status(200).json({ token: transactionToken });
+  //   })
+  //   .catch((e) => {
+  //     res.status(404).json({
+  //       status_code: "404",
+  //       error_message: e,
+  //     });
+  //   });
 });
 
 /**
@@ -247,6 +275,10 @@ app.get("/det/:transaction_id", function (req, res) {
         status_message: "Transaction id not found",
       });
     });
+});
+
+app.get("/start-app", function (req, res) {
+  res.status(301).redirect("https://marchaa.vercel.app/")
 });
 
 app.get("/.well-known/assetlinks.json", function (req, res) {
